@@ -1,27 +1,34 @@
 
 
-getGif: function(url)
+getGif: function(searchingText) {
+    let url = GIPHY_API_URL + '/v1/gifs/random?api_key=' + GIPHY_PUB_KEY + '&tag=' + searchingText; 
     return new Promise(
         function(resolve, reject) {
-            let url = GIPHY_API_URL + '/v1/gifs/random?api_key=' + GIPHY_PUB_KEY + '&tag=' + searchingText; 
             const request = new XMLHttpRequest();
+            request.open('GET', url);
             request.onload = function() {
-                if (this.status === 200) {
-                    resolve(this.response);
+                if (request.status === 200) {
+                    var data = JSON.parse(request.responseText).data; 
+                    var gif = {  
+                        url: data.fixed_width_downsampled_url,
+                        sourceUrl: data.url
+                    };
+                    resolve(gif);
                 } else {
-                    reject(new Error(this.statusText));
+                    reject(new Error(request.statusText));
                 }
             };
             request.onerror = function() {
                 reject(new Error(
-                   `XMLHttpRequest Error: ${this.statusText}`));
+                   `XMLHttpRequest Error: ${request.statusText}`));
             };
-            request.open('GET', url);
             request.send();
-        });
+        }
+    );
+}
 
-
-getGif(url).then(this.response => this.response.json())
+getGif(searchingText)
+.then(this.response => this.response.json())
 .then((this.response) => {
     let data = this.response.data; 
     let gif = {  
